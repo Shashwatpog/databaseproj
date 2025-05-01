@@ -1,5 +1,5 @@
 import Navbar from '../components/navbar';
-import './globals.css'; // If TailwindCSS or your styles are installed
+import './globals.css';
 
 export const metadata = {
   title: 'Online Store',

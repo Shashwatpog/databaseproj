@@ -1,152 +1,200 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import Link from "next/link";
 
 export default function CheckoutPage() {
   const [cart, setCart] = useState([]);
+  const [total, setTotal] = useState(0);
   const [deliveryType, setDeliveryType] = useState("standard");
 
-  // New: customer + card + address inputs
-  const [customerName, setCustomerName] = useState("");
-  const [cardNumber, setCardNumber] = useState("");
-  const [expiryDate, setExpiryDate] = useState("");
-  const [nameOnCard, setNameOnCard] = useState("");
-  const [street, setStreet] = useState("");
-  const [city, setCity] = useState("");
-  const [state, setState] = useState("");
-  const [zip, setZip] = useState("");
-  const [country, setCountry] = useState("");
+  const [addresses, setAddresses] = useState([]);
+  const [cards, setCards] = useState([]);
+  const [selectedAddressId, setSelectedAddressId] = useState(null);
+  const [selectedCardId, setSelectedCardId] = useState(null);
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   useEffect(() => {
-    const storedCart = JSON.parse(localStorage.getItem("cart")) || [];
-    setCart(storedCart);
-  }, []);
+    const stored = JSON.parse(localStorage.getItem("cart") || "[]");
+    setCart(stored);
 
-  const getDeliveryPrice = () => (deliveryType === "express" ? 20.0 : 5.0);
-  const today = new Date().toISOString().split("T")[0];
+    const subtotal = stored.reduce((acc, item) => acc + item.price * item.quantity, 0);
+    const deliveryFee = deliveryType === "express" ? 9.99 : 0;
+    setTotal(subtotal + deliveryFee);
+
+    const customerId = localStorage.getItem("customerId");
+    if (customerId) {
+      fetch(`/api/customer-profile?id=${customerId}`)
+        .then((res) => res.json())
+        .then((data) => {
+          setAddresses(data.addresses || []);
+          setCards(data.cards || []);
+        });
+    }
+  }, [deliveryType]);
 
   const handleCheckout = async () => {
-    const cartItems = cart.map((item) => ({
-      product_id: item.product_id,
-      quantity: item.quantity,
-    }));
+    const customerId = localStorage.getItem("customerId");
 
-    try {
-      // 1. Create customer
-      const customerRes = await fetch("/api/customers", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: customerName }),
-      });
-      const customer = await customerRes.json();
-      const customerId = customer.id;
+    if (!customerId) {
+      setShowAuthModal(true);
+      return;
+    }
 
-      // 2. Create address
-      const addressRes = await fetch("/api/addresses", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          street,
-          city,
-          state,
-          zip,
-          country,
-          customer_id: customerId,
-        }),
-      });
-      const address = await addressRes.json();
-      const addressId = address.id;
+    if (!selectedAddressId || !selectedCardId) {
+      alert("Please select both an address and a credit card.");
+      return;
+    }
 
-      // 3. Create credit card
-      const creditRes = await fetch("/api/credit-cards", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          card_number: cardNumber,
-          expiry_date: expiryDate,
-          name_on_card: nameOnCard,
-          customer_id: customerId,
-          address_id: addressId,
-        }),
-      });
-      const creditCard = await creditRes.json();
-      const creditCardId = creditCard.id;
+    const res = await fetch("/api/orders", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        customer_id: customerId,
+        credit_card_id: selectedCardId,
+        delivery_type: deliveryType,
+        cart,
+      }),
+    });
 
-      // 4. Place order
-      const res = await fetch("/api/orders", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          customerId,
-          creditCardId,
-          deliveryType,
-          deliveryPrice: getDeliveryPrice(),
-          deliveryDate: today,
-          shipDate: today,
-          cartItems,
-        }),
-      });
-
-      if (res.ok) {
-        alert("Order placed successfully!");
-        localStorage.removeItem("cart");
-        window.location.href = "/customer";
-      } else {
-        const text = await res.text();
-        console.error("Failed to place order:", text);
-        alert("Failed to place order.");
-      }
-    } catch (error) {
-      console.error("Checkout error:", error);
-      alert("Something went wrong.");
+    if (res.ok) {
+      alert("Order placed!");
+      localStorage.removeItem("cart");
+      window.location.href = "/customer";
+    } else {
+      const text = await res.text();
+      alert(text);
     }
   };
 
-  const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const total = subtotal + getDeliveryPrice();
-
   return (
-    <div className="p-6 space-y-4">
+    <div className="p-6 max-w-3xl mx-auto space-y-6">
       <h1 className="text-2xl font-bold">Checkout</h1>
 
       <div>
-        <h2 className="text-lg font-semibold">Customer Info</h2>
-        <input className="border p-2 block mb-2" placeholder="Full Name" value={customerName} onChange={(e) => setCustomerName(e.target.value)} />
+        <h2 className="font-semibold">Cart</h2>
+        {cart.length === 0 ? (
+          <p>Your cart is empty.</p>
+        ) : (
+          <>
+            <ul className="divide-y border rounded mb-4">
+              {cart.map((item, idx) => (
+                <li key={idx} className="p-4 flex justify-between">
+                  <span>{item.product_name} × {item.quantity}</span>
+                  <span>${(item.price * item.quantity).toFixed(2)}</span>
+                </li>
+              ))}
+            </ul>
+            <p className="text-right">
+              Subtotal: ${(total - (deliveryType === "express" ? 9.99 : 0)).toFixed(2)}
+            </p>
+            {deliveryType === "express" && (
+              <p className="text-right">Express Delivery: $9.99</p>
+            )}
+            <p className="text-right font-bold">Total: ${total.toFixed(2)}</p>
+          </>
+        )}
       </div>
 
       <div>
-        <h2 className="text-lg font-semibold">Address</h2>
-        <input className="border p-2 block mb-2" placeholder="Street" value={street} onChange={(e) => setStreet(e.target.value)} />
-        <input className="border p-2 block mb-2" placeholder="City" value={city} onChange={(e) => setCity(e.target.value)} />
-        <input className="border p-2 block mb-2" placeholder="State" value={state} onChange={(e) => setState(e.target.value)} />
-        <input className="border p-2 block mb-2" placeholder="ZIP" value={zip} onChange={(e) => setZip(e.target.value)} />
-        <input className="border p-2 block mb-2" placeholder="Country" value={country} onChange={(e) => setCountry(e.target.value)} />
+        <h2 className="font-semibold">Shipping Address</h2>
+        {addresses.length > 0 ? (
+          <select
+            className="border p-2 w-full bg-gray-800 text-white rounded"
+            value={selectedAddressId || ""}
+            onChange={(e) => setSelectedAddressId(e.target.value)}
+          >
+            <option value="">Select an address</option>
+            {addresses.map((addr) => (
+              <option key={addr.id} value={addr.id}>
+                {addr.street}, {addr.city}, {addr.state}, {addr.zip}
+              </option>
+            ))}
+          </select>
+        ) : (
+          <p className="text-sm text-gray-600 italic">
+            No addresses found. Please{" "}
+            <button onClick={() => setShowAuthModal(true)} className="underline text-blue-600">
+              add one in your profile
+            </button>.
+          </p>
+        )}
       </div>
 
       <div>
-        <h2 className="text-lg font-semibold">Payment</h2>
-        <input className="border p-2 block mb-2" placeholder="Card Number" value={cardNumber} onChange={(e) => setCardNumber(e.target.value)} />
-        <input className="border p-2 block mb-2" placeholder="Expiry Date (YYYY-MM-DD)" value={expiryDate} onChange={(e) => setExpiryDate(e.target.value)} />
-        <input className="border p-2 block mb-2" placeholder="Name on Card" value={nameOnCard} onChange={(e) => setNameOnCard(e.target.value)} />
+        <h2 className="font-semibold">Credit Card</h2>
+        {cards.length > 0 ? (
+          <select
+            className="border p-2 w-full bg-gray-800 text-white rounded"
+            value={selectedCardId || ""}
+            onChange={(e) => setSelectedCardId(e.target.value)}
+          >
+            <option value="">Select a credit card</option>
+            {cards.map((card) => (
+              <option key={card.id} value={card.id}>
+                **** **** **** {card.card_number.slice(-4)} — {card.name_on_card}
+              </option>
+            ))}
+          </select>
+        ) : (
+          <p className="text-sm text-gray-600 italic">
+            No credit cards found. Please{" "}
+            <button onClick={() => setShowAuthModal(true)} className="underline text-blue-600">
+              add one in your profile
+            </button>.
+          </p>
+        )}
       </div>
 
       <div>
-        <label>Delivery Type:</label>
-        <select value={deliveryType} onChange={(e) => setDeliveryType(e.target.value)} className="border p-2 ml-2">
-          <option value="standard">Standard ($5)</option>
-          <option value="express">Express ($20)</option>
+        <h2 className="font-semibold">Delivery Plan</h2>
+        <select
+          className="border p-2 w-full bg-gray-800 text-white rounded"
+          value={deliveryType}
+          onChange={(e) => setDeliveryType(e.target.value)}
+        >
+          <option value="standard">Standard (Free)</option>
+          <option value="express">Express ($9.99)</option>
         </select>
       </div>
 
-      <div className="mt-4">
-        <p>Subtotal: ${subtotal.toFixed(2)}</p>
-        <p>Delivery Fee: ${getDeliveryPrice().toFixed(2)}</p>
-        <p className="font-bold text-lg">Total: ${total.toFixed(2)}</p>
-      </div>
-
-      <button onClick={handleCheckout} className="bg-green-600 text-white p-3 rounded">
+      <button
+        onClick={handleCheckout}
+        className="bg-green-600 text-white px-4 py-2 rounded"
+      >
         Place Order
       </button>
+
+      {showAuthModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded shadow-md space-y-4 max-w-sm w-full">
+            <h2 className="text-xl font-bold">Sign In Required</h2>
+            <p className="text-sm text-gray-700">
+              Please log in or register to place your order.
+            </p>
+            <div className="flex justify-between">
+              <Link
+                href="/customer/login"
+                className="bg-blue-600 text-white px-4 py-2 rounded"
+              >
+                Log In
+              </Link>
+              <Link
+                href="/customer/register"
+                className="bg-gray-600 text-white px-4 py-2 rounded"
+              >
+                Register
+              </Link>
+            </div>
+            <button
+              onClick={() => setShowAuthModal(false)}
+              className="text-sm text-gray-500 underline block mx-auto"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

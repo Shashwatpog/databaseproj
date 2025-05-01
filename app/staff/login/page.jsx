@@ -14,7 +14,7 @@ export default function StaffLogin() {
     if (res.ok) {
       const { staffId } = await res.json();
       localStorage.setItem('staffId', staffId);
-      window.location.href = '/staff/dashboard';
+      window.location.href = '/staff';
     } else alert('Login failed.');
   };
 
