@@ -42,6 +42,7 @@ npm run dev
 ```
 Visit: [http://localhost:3000](http://localhost:3000)
 
+---
 
 ## ER Model Used:
 ![er-model](https://github.com/user-attachments/assets/f06868bb-59d2-49a5-942c-e06bf043ff1a)
@@ -52,6 +53,21 @@ Or
 
 [View the ER code markdown file](er-model.md)
 
+## Database Schema 
+
+Refer to the following files to set up your database:
+
+```
+-- Create tables:
+-- schema/createTable.sql
+
+-- Create indexes:
+-- schema/createIndex.sql
+```
+- [createTable.sql](schema/createTable.sql)
+- [createIndex.sql](schema/createIndex.sql)
+
+---
 
 ## Roles & Features
 
