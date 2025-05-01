@@ -1,40 +1,82 @@
-<<<<<<< HEAD
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Online Store application using NextJS and PostgreSQL 
 
-## Getting Started
+This is a full-stack online store built using the latest Next.js App Router, PostgreSQL (via pgAdmin), and custom RESTful APIs. It supports customer and staff roles, product management, cart/checkout flows, stock control, warehouse logic, and more.
 
-First, run the development server:
+## To Run this follow the steps:
 
+### 1. Clone the repository
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone [your-repo-url]
+cd [your-project-folder]
+```
+### 2. Install the Dependencies
+```bash
+npm install
+```
+### 3. Set up the database
+
+- Open pgAdmin or use psql CLI.
+
+- Run the SQL files:
+
+    - createTable.sql — creates all tables (PRODUCT, STOCK, ORDER, etc.)
+
+    - createIndex.sql — optional: adds indexes to improve search
+
+- Seed data manually such as product info, staff data and login, warehouse info, etc.
+
+
+### 4. Add environment variables
+
+Create a file called `.env.local` in the root directory:
+
+``` bash
+DATABASE_URL=postgresql://your_username:your_password@localhost:5432/your_database_name
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Replace this with your actual PostgreSQL credentials
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 5. Run the application
+``` bash
+npm run dev
+```
+Visit: [http://localhost:3000](http://localhost:3000)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Roles & Features
 
-## Learn More
+### Customer
+- Register, login, and manage credit cards and addresses
+- Browse and search products using product name, category, type, description
+- Filter by category, brand, or type
+- Add/remove items from cart
+- Checkout using saved credit cards and addresses
+- See total cost including express delivery
+- Order stock only if available
 
-To learn more about Next.js, take a look at the following resources:
+### Staff
+- Login as admin
+- Add, update, delete products & prices
+- Add stock to warehouses with capacity validation
+- View product quantity across all warehouses
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-## Deploy on Vercel
+## 🛠 Technologies Used
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- Next.js (App Router)
+- PostgreSQL via pgAdmin
+- TailwindCSS
+- Custom REST APIs (under `/app/api`)
+- Auth split between customer & staff roles
+- Bcrypt to hash customer and staff passwords
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-=======
-# databaseproj
->>>>>>> 7a5b6a1f788bf672551e49891a5c47d9e2da382a
+---
+
+## ✅ Status
+
+All core features are implemented:
+- [x] Role-based access
+- [x] Product search/filter/sort
+- [x] Checkout logic with validation
+- [x] Warehouse stock & capacity checks
+- [x] Admin/staff dashboard
