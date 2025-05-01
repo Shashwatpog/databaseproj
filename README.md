@@ -46,6 +46,12 @@ Visit: [http://localhost:3000](http://localhost:3000)
 ## ER Model Used:
 ![er-model](https://github.com/user-attachments/assets/f06868bb-59d2-49a5-942c-e06bf043ff1a)
 
+ER Model design using [Mermaid](https://mermaid.js.org/) refer to : [mermaid code](https://www.mermaidchart.com/play#pako:eNqdVduOmzAQ_RWU9_xA3hCwKmq2QUBaVYpkObY3mRWxXdtsm03y7zWBJVws0C4v4Jkz9syZ4-GyIIKyxWrBVAj4oPBpxz37BNss3zxHqXe9Lpfi4vlhmEZZ5q28I9ZuSJBGYZyjwE_DKdgmDe1i5ckCEzbEXOp19QA3HtDHWhsF_OBxfGIP40shsPEwIaLkBu1xgTlp3Lcdrz8-Up_f274YMyMzAXN2YLFhI-s7yHF4lZs6D7LqsnUTy-X12uEYay0I2AMo-gvmOI6Yr4VgRREvT3umRj72T4I6I-qqoOIXCY6q-EHKWe4_PX26RY0RU6qY1sPWadsyNWb3VeyRAVMMe5mkm3Ab5B9aapYoSeMg6opugLPqCr5bvzZCWU7BvdtdmSjOo2cLBU6KkjrAX6zfnOXYuFeYO2QI72MoZZookAYEd_TasIMYSazPzkTedSukAtI5t1KH94YLoOhFiZPTYcTgyF9-Gn3bbLNoyDwR3GDgegibZ7MnnI4Wq30noqv1nxJz017eNraeQK6m97N84Ozl7E83iaF7NXvIMFrHP6P0N0rW_o-uKGvURM53ZkHr0srOeTmroVNqVzl1BV_jo5_wfEcoK-CN2QHS13StotbpklPr7Fd39-kjyI790eltkqzjyT9RC_nM3bz1Y2cJbOZVKWUBTHXLa3ba8cXtPziQJk4)
+
+Or 
+
+[View the ER code markdown file](er-model.md)
+
 
 ## Roles & Features
 
