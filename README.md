@@ -42,6 +42,11 @@ npm run dev
 ```
 Visit: [http://localhost:3000](http://localhost:3000)
 
+
+## ER Model Used:
+![er-model](https://github.com/user-attachments/assets/f06868bb-59d2-49a5-942c-e06bf043ff1a)
+
+
 ## Roles & Features
 
 ### Customer
